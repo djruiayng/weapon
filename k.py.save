@@ -1,0 +1,174 @@
+# -*- coding: utf-8 -*-
+from Linephu.linepy import *
+import codecs, json
+from humanfriendly import format_timespan
+import time, threading
+ts = time.time()
+botStart = time.time()
+cl = LINE()
+cl.log(cl.authToken)
+k1 = LINE(cl.authToken)
+k2 = LINE(cl.authToken)
+k3 = LINE(cl.authToken)
+k4 = LINE(cl.authToken)
+k5 = LINE(cl.authToken)
+k6 = LINE(cl.authToken)
+k7 = LINE(cl.authToken)
+k8 = LINE(cl.authToken)
+k9 = LINE(cl.authToken)
+k10 = LINE(cl.authToken)
+k11 = LINE(cl.authToken)
+k12 = LINE(cl.authToken)
+k13 = LINE(cl.authToken)
+k14 = LINE(cl.authToken)
+k15 = LINE(cl.authToken)
+k16 = LINE(cl.authToken)
+k17 = LINE(cl.authToken)
+k18 = LINE(cl.authToken)
+k19 = LINE(cl.authToken)
+k20 = LINE(cl.authToken)
+oepoll = OEPoll(cl)
+settingsOpen = codecs.open("temp.json","r","utf-8")
+settings = json.load(settingsOpen)
+lineSettings = cl.getSettings()
+clProfile = cl.getProfile()
+clMID = cl.profile.mid
+admin = [clMID, "uec56bb5a959005526b8b96e6907014e8",'uf5cea65de5804929ce44c168cb26addd','u9ca695057d9f61bf34b54a6b1343f39c','ua66ce0e2921ecd068760eda436c56746']
+bots = [cl, k1, k2, k3, k4, k5, k6, k7, k8, k9, k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20]
+print("登入成功\n全体登入時間: {} s\n重複登入的次數 {}".format(time.time()-ts, len(bots)))
+klist = []
+def Kick(n, to, mid):
+    while 1:
+        bots[n].kickoutFromGroup(to, mid)
+        break
+def bot(op):
+    try:
+        if op.type == 0:
+            return
+        if op.type == 13: cl.acceptGroupInvitation(op.param1)
+        if op.type == 17:
+            if op.param2 not in admin:
+                if settings["joinkick"] == True:
+                    threading.Thread(target=cl.kickoutFromGroup, args=(op.param1,[op.param2],)).start()
+        if op.type == 19:
+            if settings["protect"] == True:
+                
+        if op.type in [25, 26]:
+            if op.message.contentType == 0 and op.message._from in admin and op.message.toType == 2:
+                if op.message.text is None: return
+                elif op.message.text.lower().startswith(".t ") and "MENTION" in op.message.contentMetadata:
+                    if settings["kick"] == True:
+                        key = eval(op.message.contentMetadata["MENTION"])
+                        key["MENTIONEES"][0]["M"]
+                        n = 0
+                        for x in key["MENTIONEES"]:
+                            if n == len(bots):
+                                n = 0
+                            threading.Thread(target=Kick, args=(n, op.message.to, [x["M"]],)).start()
+                            n += 1
+                        return
+                    else:
+                        cl.sendMessage(op.message.to, "你的專武已關閉,機器不會踢人")
+                elif op.message.text.lower().startswith(".k ") and "MENTION" in op.message.contentMetadata:
+                    if settings["kick"] == True:
+                        key = eval(op.message.contentMetadata["MENTION"])
+                        key["MENTIONEES"][0]["M"]
+                        n = 0
+                        for x in key["MENTIONEES"]:
+                            if n == len(bots):
+                                n = 0
+                            threading.Thread(target=Kick, args=(n, op.message.to, [x["M"]],)).start()
+                            n += 1
+                        return
+                    else:
+                        cl.sendMessage(op.message.to, "你的專武已關閉,機器不會踢人")
+                elif "sp" == op.message.text.lower():
+                    t1 = time.time()
+                    threading.Thread(target=cl.sendMessage, args=(op.message.to, "速度測試",)).start()
+                    t2 = time.time() - t1
+                    time.sleep(1)
+                    return cl.sendMessage(op.message.to, "速度偵測為\n%s 秒" %t2)
+                elif op.message.text.lower().startswith("加入 ") and "MENTION" in op.message.contentMetadata:
+                    key = eval(op.message.contentMetadata["MENTION"])
+                    key["MENTIONEES"][0]["M"]
+                    for x in key["MENTIONEES"]:
+                        klist.append(x["M"])
+                    return cl.sendMessage(op.message.to, "完成")
+                elif "列表踢" == op.message.text.lower():
+                    if settings["kick"] == True:
+                        n = 0
+                        for x in klist:
+                            if n == len(bots):
+                                n = 0
+                            threading.Thread(target=Kick, args=(n, op.message.to, [x],)).start()
+                            n += 1
+                        return
+                    else:
+                        cl.sendMessage(op.message.to, "你的專武已關閉,機器不會踢人")
+                elif op.message.text.lower().startswith("刪除 "):
+                    input1 = op.message.text.replace("刪除 ","")
+                    sep = input1.split(" ")
+                    for x in sep:
+                        try:
+                            kill = klist[(int(x)-1)]
+                            klist.remove(kill)
+                            cl.sendMessage(op.message.to, "完成")
+                        except:
+                            cl.sendMessage(op.message.to, "無效範圍刪除失敗")
+                elif "踢人列表" == op.message.text:
+                    if klist == []:
+                        cl.sendMessage(to=op.message.to, text="列表沒人")
+                    else:
+                        no = 1
+                        rlist = "╭───「 kill List 」"
+                        for x in klist:
+                            rlist += "\n├≽{}. {}".format(str(no), cl.getContact(x).displayName)
+                            no += 1
+                        rlist += "\n╰───「 kill {} Members 」".format(len(klist))
+                        cl.sendMessage(to=op.message.to, text=str(rlist))
+                elif "runtime" == op.message.text:
+                    timeNow = time.time()
+                    runtime = timeNow - botStart
+                    runtime = format_timespan(runtime)
+                    cl.sendMessage(op.message.to, "機器運行時間 {}".format(str(runtime)))
+                elif "專武開" == op.message.text:
+                    settings["kick"] = True
+                    with open('temp.json', 'w') as fp:
+                        json.dump(settings, fp, sort_keys=True, indent=4)
+                    cl.sendMessage(to=op.message.to, text="已開啟")
+                elif "專武關" == op.message.text:
+                    settings["kick"] = False
+                    with open('temp.json', 'w') as fp:
+                        json.dump(settings, fp, sort_keys=True, indent=4)
+                    cl.sendMessage(to=op.message.to, text="已關閉")
+                elif "清空列表" == op.message.text:
+                    klist.clear()
+                    cl.sendMessage(to=op.message.to, text="清除快取完成")
+                elif op.message.text.lower() == ".set":
+                    t0 = time.time() 
+                    t1 = time.time() - t0
+                    t2 = time.time() 
+                    t3 = time.time() - t2
+                    time.sleep(0.5)
+                    ret_ = "偵測訊息\n"
+                    if settings["kick"] == 0: ret_ +="專武已關閉\n"
+                    else: ret_ += "專武已開啟\n"
+                    ret_ += "終端登入的次數 {}\n".format(len(bots))
+                    ret_ += "登入版本 測試版專武"
+                    cl.sendMessage(op.message.to, str(ret_))
+                    return
+    except Exception as e:
+        print(e)
+def RunBot():
+    while True:
+        try:
+            ops = oepoll.singleTrace(count=50)
+            if ops is not None:
+                for op in ops:
+                    oepoll.setRevision(op.revision)
+                    bot(op)
+        except Exception as e: print(e)
+def Run():
+    RunBot()
+if __name__ == "__main__":
+    Run()
